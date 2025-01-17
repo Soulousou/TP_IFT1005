@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>OnlineShop - Produit</title>
+   <!--Par Sara Gair (20216922) et John Woodly Destine 20236100--> 
+  <link rel="stylesheet" type="text/css" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
+  <link rel="stylesheet" type="text/css" href="./assets/css/style.css">
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <div class="logo">
+        <a href="./index.html">
+          <img alt="logo" src="./assets/img/logo.svg" title="Accueil">
+        </a>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="./index.html">Accueil</a></li>
+          <li class="active"><a href="./products.html">Produits</a></li>
+          <li><a href="./contact.html">Contact</a></li>
+          <li>
+            <a class="shopping-cart" href="./shopping-cart.html" title="Panier">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x fa-inverse"></i>
+                <i class="fa fa-shopping-cart fa-stack-1x"></i>
+              </span>
+              <span class="count" id="count">0</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <article id="product_description">
+      <h1 id="nom">Manette Xbox 360</h1>
+      <div class="row">
+        <div class="col">
+          <img id="product-image" alt="Manette Xbox 360" src="./assets/img/xbox-controller.png">
+        </div>
+        <div class="col">
+          <section>
+            <h2>Description</h2>
+            <p id="description">Manette pouvant être branchée à une console Xbox 360 et un PC. Cette manette vous permettra de jouer à vos jeux vidéo préférés.
+            De plus, cette manette est sans fil et comporte un port pour casque d'écoute.</p>
+          </section>
+          <section>
+            <h2>Caractéristiques</h2>
+            <ul id="caracteristique">
+              <li>Manette sans fil 2.4GHz avec adapteur USB</li>
+              <li>Compacte et ergonomique</li>
+              <li>Port pour casque d'écoute pour Xbox Live</li>
+            </ul>
+          </section>
+          <hr>
+          <form class="pull-right" id="product-form">
+            <label for="product-quantity">Quantité:</label>
+            <input class="form-control" id="product-quantity" type="number" value="1" min="1">
+            <button id="btn" class="btn" title="Ajouter au panier" type="button">
+              <i class="fa fa-cart-plus"></i>&nbsp; Ajouter
+            </button>
+          </form>
+          <p id="produit-prix">Prix: <strong>29,99&thinsp;$</strong></p>
+        </div>
+      </div>
+    </article>
+  </main>
+  <h2 id="dialog">Cet article a été ajouté à votre panier!</h2>
+  <footer>
+    <p>Par Sara Gair (20216922) et John Woodly Destine 20236100</p>
+  </footer>
+</body>
+
+<script  type="text/javascript"src="./assets/js/jquery-3.6.1.js"></script>
+<script>
+jQuery(document).ready(function(){
+
+//Obtenir l'id de l'item via le lien internet car chaque item à sa propre page
+function GetURLParameter(sParam)
+{
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+    for (var i = 0; i < sURLVariables.length; i++) 
+    {
+        var sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] == sParam) 
+        {
+            return sParameterName[1];
+        }
+    }
+}
+var id = GetURLParameter("id");
+
+//Afficher les détails du produit selon les informations dans le fichier JSON
+var listeId= [];
+var tempoCount =0;
+
+$.getJSON("./data/products.json", function getArray(result){
+  $.each(result, function(ordre, article){
+    
+    listeId.push(article.id)
+
+    if(article.id == id){
+
+      $("#nom").empty();
+      $("#description").empty();
+      $("#produit-prix").empty();
+      $("#caracteristique").empty();
+
+      $("#nom").append(article.name);
+      var imageLink = "./assets/img/" + article.image
+      $('#product-image').attr('src', imageLink);
+      $("#description").append(article.description)
+      $("#produit-prix").append("Prix: <strong>"+ article.price+"$</strong>")
+
+      var stringListe ="";
+      $.each(article.features, function(ordreElement, feature){
+        stringListe += "<li>" + feature +"</li>"
+
+      })
+      $("#caracteristique").append(stringListe)
+
+    }
+
+  });
+
+  //Vérifier que le ID existe dans notre fichier JSON grâce à la liste qui les stocke tous. S'il n'est pas là, une page d'erreur s'affiche
+  if(listeId.includes(+id) == false){
+    $("#product_description").empty();
+    $("#product_description").append("<h1>Page non trouvée</h1>")
+
+  }
+
+});
+
+//On initialise le localStorage de l'item (clé= id, valeur= nombre d'item)
+function loadItemCount(){
+var itemCount = localStorage.getItem(id);
+if(itemCount == "null" || itemCount == "undefined" || itemCount == null){
+
+  itemCount = 0;
+	localStorage.setItem(id, itemCount);}
+}
+loadItemCount();
+
+
+//Fonction pour le bouton Ajouter
+$("#btn").click(function(){
+
+  //Obtenir le nombre d'item initial de l'objet puis ajouter la valeur entrée par le bouton
+  var countSubmit = $("#product-quantity").val();
+  var currentCount = localStorage.getItem(id);
+  var currentCountI = parseFloat(currentCount);
+  currentCountI += parseFloat(countSubmit);
+  localStorage.setItem(id, currentCountI);
+
+
+  //Count global
+  var currentCounts = localStorage.getItem("countValue");
+  var currentCountsI = parseFloat(currentCounts);
+  currentCountsI += parseFloat(countSubmit);
+
+  localStorage.setItem("countValue", currentCountsI)
+
+  $("#count").text(currentCountsI)
+  $("#count").show();
+
+  //Montrer la boîte de dialogue qui confirme que l'item a été ajouté
+  $("#dialog").show();
+  setTimeout(function() { $("#dialog").fadeOut(100); }, 5000)
+
+})
+
+$("#dialog").hide();
+
+//Updater le count
+function updateCount(){
+
+var current = localStorage.getItem("countValue");
+
+if(current <= 0 || current == null){
+  localStorage.setItem("countValue", 0)
+$("#count").hide();}
+else{
+  $("#count").text(current);
+  $("#count").show()}
+}
+
+updateCount();
+
+
+});
+</script>
+</html>

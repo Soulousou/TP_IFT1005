@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>OnlineShop - Produits</title>
+   <!--Par Sara Gair (20216922) et John Woodly Destine 20236100--> 
+  <link rel="stylesheet" type="text/css" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
+  <link rel="stylesheet" type="text/css" href="./assets/css/style.css">
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <div class="logo">
+        <a href="./index.html">
+          <img alt="logo" src="./assets/img/logo.svg" title="Accueil">
+        </a>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="./index.html">Accueil</a></li>
+          <li class="active"><a href="./products.html">Produits</a></li>
+          <li><a href="./contact.html">Contact</a></li>
+          <li>
+            <a class="shopping-cart" href="./shopping-cart.html" title="Panier">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x fa-inverse"></i>
+                <i class="fa fa-shopping-cart fa-stack-1x"></i>
+              </span>
+              <span class="count" id="count">0</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section class="sidebar" aria-label="Filtres">
+      <section>
+        <h2>Catégories</h2>
+        <div class="btn-group vertical" id="product-categories">
+          <button id="photo">Appareils photo</button>
+          <button id="console">Consoles</button>
+          <button id="ecran">Écrans</button>
+          <button id="ordi">Ordinateurs</button>
+          <button id="tous">Tous les produits</button>
+        </div>
+      </section>
+      <section>
+        <h2>Classement</h2>
+        <div class="btn-group vertical" id="product-criteria">
+          <button id="prixb">Prix (bas-haut)</button>
+          <button id="prixh">Prix (haut-bas)</button>
+          <button id="noma">Nom (A-Z) </button>
+          <button id="nomz">Nom (Z-A)</button>
+        </div>
+      </section>
+    </section>
+    <article>
+      <span class="right-header" id="productnumber">13 produits</span>
+      <h1>Produits</h1>
+      <div class="products" id="products-list">
+        
+      </div>
+    </article>
+  </main>
+  <footer>
+    <p>Par Sara Gair (20216922) et John Woodly Destine 20236100</p>
+  </footer>
+</body>
+
+<script  type="text/javascript"src="./assets/js/jquery-3.6.1.js"></script>
+<script>
+jQuery(document).ready(function(){
+
+
+var jsonArray = [];
+var allProducts =[];
+
+//Recueillir tous les items du JSON pour les stocker dans deux listes
+$.getJSON("./data/products.json", function getArray(result){
+  $.each(result, function(ordre, article){
+    jsonArray.push(article);
+    allProducts.push(article);
+    
+  });
+
+});
+
+//Aficher les items prix(bas-haut)
+function prixb(){
+
+//Ajouter la classe selected au bouton prixb et l'enlever des autres boutons
+$("#prixb").addClass("selected")
+$("#prixh").removeClass("selected")
+$("#noma").removeClass("selected")
+$("#nomz").removeClass("selected")
+
+//Vider la section qui montre les produits
+$("#products-list").empty();
+
+//Fonction qui sort les items selon leur prix (bas à haut)
+jsonArray.sort(function(a,b){
+    if(a.price < b.price) return -1;
+    if(b.price < a.price) return 1;
+    return 0;
+}); 
+
+//Remplir le catalogue selon la liste triée
+$.each(jsonArray, function(ordre, article){
+  var link = "./assets/img/" +article.image;
+  var productLink = "./product.html?id=" + article.id;
+    $("#products-list").append(
+      
+    "<div class='product'><a href="+ productLink + "><h2>"+article.name+"</h2><img src="+ link +"><p class="+"Prix"+">Prix:" + article.price +"</p></a></div>"
+    );
+  })
+}
+
+//Même chose pour le choix prix haut à bas
+function prixh(){
+
+  $("#prixh").addClass("selected")
+  $("#prixb").removeClass("selected")
+  $("#noma").removeClass("selected")
+  $("#nomz").removeClass("selected")
+
+  $("#products-list").empty();
+
+    jsonArray.sort(function(a,b){
+    if(b.price < a.price) return -1;
+    if(a.price < b.price) return 1;
+    return 0;
+    }); 
+
+    $.each(jsonArray, function(ordre, article){
+      var link = "./assets/img/" +article.image;
+      var productLink = "./product.html?id=" + article.id;
+      $("#products-list").append(
+      
+        "<div class='product'><a href="+ productLink + "><h2>"+article.name+"</h2><img src="+ link +"><p class="+"Prix"+">Prix:" + article.price +"</p></a></div>")
+    })
+}
+
+//Même chose pour afficher selon l'ordre alphabétique (a-z)
+function noma(){
+
+  $("#noma").addClass("selected")
+  $("#prixb").removeClass("selected")
+  $("#prixh").removeClass("selected")
+  $("#nomz").removeClass("selected")
+
+  $("#products-list").empty();
+
+      
+  jsonArray.sort(function(a,b){
+  if(a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+  if(b.name.toLowerCase() < a.name.toLowerCase()) return 1;
+  return 0;
+  }); 
+
+  $.each(jsonArray, function(ordre, article){
+    var link = "./assets/img/" +article.image;
+    var productLink = "./product.html?id=" + article.id;
+      $("#products-list").append(
+        "<div class='product'><a href="+ productLink + "><h2>"+article.name+"</h2><img src="+ link +"><p class="+"Prix"+">Prix:" + article.price +"</p></a></div>"
+        );
+    })
+}
+
+//Même chose pour afficher selon l'ordre alphabétique (z-a)
+function nomz(){
+
+  $("#nomz").addClass("selected")
+  $("#prixb").removeClass("selected")
+  $("#noma").removeClass("selected")
+  $("#prixh").removeClass("selected")
+
+$("#products-list").empty();
+
+    
+    jsonArray.sort(function(a,b){
+    if(b.name.toLowerCase() < a.name.toLowerCase()) return -1;
+    if(a.name.toLowerCase() < b.name.toLowerCase()) return 1;
+    return 0;
+  }); 
+
+  $.each(jsonArray, function(ordre, article){
+    var link = "./assets/img/" +article.image;
+    var productLink = "./product.html?id=" + article.id;
+      $("#products-list").append(
+      
+      "<div class='product'><a href="+ productLink + "><h2>"+article.name+"</h2><img src="+ link +"><p class="+"Prix"+">Prix:" + article.price +"</p></a></div>"
+        );
+  })
+
+}
+
+//Fonction pour que la liste de produit affichée ne contienne que la catégorie sélectionnée
+//Elle fait le tri
+function defineCategory(categoryChosen){
+
+   var tempoJsonArray = [];
+
+  $.each(jsonArray, function(ordre, article){
+    if(article.category == categoryChosen){
+      tempoJsonArray.push(article);
+    }
+  })
+
+  jsonArray = tempoJsonArray;
+}
+
+//1. On rajoute la classe selected au bouton sélectionné (ici tous => affiche tous les produits)
+//2. On enlève cette classe aux autres boutons dans "Catégories"
+//3. Dans les boutons "Classement" on regarde lequel à la classe selected
+//4. On affiche le nombre de produit total
+$("#tous").click(function tous(){
+
+$("#tous").addClass("selected")
+$("#photo").removeClass("selected")
+$("#console").removeClass("selected")
+$("#ecran").removeClass("selected")
+$("#ordi").removeClass("selected")
+
+$.getJSON("./data/products.json", function getArray(result){
+
+  jsonArray = result;
+  if($("#prixb").hasClass("selected")){prixb();}
+  if($("#prixh").hasClass("selected")){prixh();}
+  if($("#noma").hasClass("selected")){noma();}
+  if($("#nomz").hasClass("selected")){nomz();}
+
+  $("#productnumber").html(jsonArray.length + " produits");
+})
+})
+
+//Même principe à la différence qu'on trie les items avec la fonction defineCategory pour n'afficher que ceux voulus
+//Le nombre de produits affiché diffère selon la taille de la liste 
+//La liste JSON est initialisé avec la liste allProducts car jsonArray change selon les boutons mais allProducts reste toujours la même
+//C'est la liste de référence utilisée pour faire le tri
+$("#photo").click(function(){
+
+  jsonArray = allProducts;
+
+  $("#photo").addClass("selected")
+  $("#tous").removeClass("selected")
+  $("#console").removeClass("selected")
+  $("#ecran").removeClass("selected")
+  $("#ordi").removeClass("selected")
+
+
+  defineCategory("cameras");
+
+  if($("#prixb").hasClass("selected")){prixb();}
+  if($("#prixh").hasClass("selected")){prixh();}
+  if($("#noma").hasClass("selected")){noma();}
+  if($("#nomz").hasClass("selected")){nomz();}
+
+  $("#productnumber").html(jsonArray.length + " produits");
+})
+
+$("#console").click(function(){
+
+  jsonArray = allProducts;
+
+  $("#console").addClass("selected")
+  $("#tous").removeClass("selected")
+  $("#photo").removeClass("selected")
+  $("#ecran").removeClass("selected")
+  $("#ordi").removeClass("selected")
+
+  defineCategory("consoles");
+
+  if($("#prixb").hasClass("selected")){prixb();}
+  if($("#prixh").hasClass("selected")){prixh();}
+  if($("#noma").hasClass("selected")){noma();}
+  if($("#nomz").hasClass("selected")){nomz();}
+
+  $("#productnumber").html(jsonArray.length + " produits");
+})
+
+//Même principe que le bouton photo
+$("#ecran").click(function(){
+
+  jsonArray = allProducts;
+
+$("#ecran").addClass("selected")
+$("#tous").removeClass("selected")
+$("#photo").removeClass("selected")
+$("#console").removeClass("selected")
+$("#ordi").removeClass("selected")
+
+defineCategory("screens");
+
+if($("#prixb").hasClass("selected")){prixb();}
+if($("#prixh").hasClass("selected")){prixh();}
+if($("#noma").hasClass("selected")){noma();}
+if($("#nomz").hasClass("selected")){nomz();}
+
+$("#productnumber").html(jsonArray.length + " produits");
+
+})
+
+//Même principe que le bouton photo
+$("#ordi").click(function(){
+
+  jsonArray = allProducts;
+
+$("#ordi").addClass("selected")
+$("#tous").removeClass("selected")
+$("#photo").removeClass("selected")
+$("#ecran").removeClass("selected")
+$("#ecran").removeClass("selected")
+
+defineCategory("computers");
+
+if($("#prixb").hasClass("selected")){prixb();}
+if($("#prixh").hasClass("selected")){prixh();}
+if($("#noma").hasClass("selected")){noma();}
+if($("#nomz").hasClass("selected")){nomz();}
+
+$("#productnumber").html(jsonArray.length + " produits");
+
+})
+
+//Répertoire des fonctions utilisées selon quel bouton de la liste "Classement" est clické
+$("#prixb").click(function(){prixb()})
+
+//Par défaut, on affiche les items avec prix(b-h) et on les affiche tous (bouton => #tous)
+$('#prixb').click();
+$("#prixb").addClass("selected")
+$("#tous").click();
+$("#tous").addClass("selected")
+
+$("#prixh").click(function(){prixh();});
+
+$("#noma").click(function(){noma();});
+
+$("#nomz").click(function(){nomz();});
+
+//Update count
+function updateCount(){
+
+var current = localStorage.getItem("countValue");
+
+if(current <= 0 || current == null){
+  localStorage.setItem("countValue", 0)
+$("#count").hide();}
+else{
+  $("#count").text(current);
+  $("#count").show()}
+}
+
+updateCount();
+})
+
+</script>
+
+</html>

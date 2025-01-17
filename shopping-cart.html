@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>OnlineShop - Panier</title>
+   <!--Par Sara Gair (20216922) et John Woodly Destine 20236100--> 
+  <link rel="stylesheet" type="text/css" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
+  <link rel="stylesheet" type="text/css" href="./assets/css/style.css">
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <div class="logo">
+        <a href="./index.html">
+          <img alt="logo" src="./assets/img/logo.svg" title="Accueil">
+        </a>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="./index.html">Accueil</a></li>
+          <li><a href="./products.html">Produits</a></li>
+          <li><a href="./contact.html">Contact</a></li>
+          <li>
+            <a class="shopping-cart" href="./shopping-cart.html" title="Panier">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x fa-inverse"></i>
+                <i class="fa fa-shopping-cart fa-stack-1x"></i>
+              </span>
+              <span class="count" id="count">0</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <article>
+      <h1>Panier</h1>
+      <h2 id="test">Test (à enlever)</h2>
+      <table class="table shopping-cart-table" id="tableItems">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Produit</th>
+            <th>Prix unitaire</th>
+            <th>Quantité</th>
+            <th>Prix</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><button title="Supprimer"><i class="fa fa-times"></i></button></td>
+            <td><a href="./product.html">Console Wii</a></td>
+            <td>199,99&thinsp;$</td>
+            <td>
+              <div class="row">
+                <div class="col">
+                  <button title="Retirer" disabled=""><i class="fa fa-minus"></i></button>
+                </div>
+                <div class="col">1</div>
+                <div class="col">
+                  <button title="Ajouter"><i class="fa fa-plus"></i></button>
+                </div>
+              </div>
+            </td>
+            <td>199,99&thinsp;$</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="shopping-cart-total" id="total">Total: <strong>704,94&thinsp;$</strong></p>
+      <a class="btn pull-right" href="./order.html">Commander <i class="fa fa-angle-double-right"></i></a>
+      <button class="btn" id="removeAll"><i class="fa fa-trash-o"></i>&nbsp; Vider le panier</button>
+    </article>
+  </main>
+  <footer>
+    <p>Par Sara Gair (20216922) et John Woodly Destine 20236100</p>
+  </footer>
+</body>
+
+<script  type="text/javascript"src="./assets/js/jquery-3.6.1.js"></script>
+<script>
+  jQuery(document).ready(function(){
+  
+//Update le count
+  function updateCount(){
+  
+  var current = localStorage.getItem("countValue");
+  
+  if(current <= 0 || current == null){
+    localStorage.setItem("countValue", 0)
+  $("#count").hide();}
+  else{
+    $("#count").text(current);
+    $("#count").show()}
+  }
+
+  //Toutes les clés qui correspondent à des ID sont stockés ici
+  //Nous avons fait exprès pour que le nom des autres clés (exemple, count) ne soient pas des int 
+  var listeProduct = [];
+  function storeID(){
+    for(i=0; i<Object.keys(localStorage).length; i++){
+    var value = Object.keys(localStorage)[i];
+    var toFloat = parseInt(value)
+    if(typeof(toFloat) == "number" && !isNaN(toFloat) && localStorage.getItem(toFloat) != 0){
+      listeProduct.push(toFloat)
+      }
+    }
+  }
+
+  //On regarde si le client a ajouté un article ou non
+  //Si non, on affiche "Aucun produit dans le panier"
+  //Si oui, on affiche la liste des produits ajoutés
+  function loadItems(){
+
+    if(listeProduct.length == 0){
+
+      $("article").empty();
+      $("article").append("<h1>Aucun produit dans le panier</h1>")
+    }
+    if(listeProduct.length > 0){displayItems()}
+  }
+
+  //Cette fonction display les items dans le panier du client
+  function displayItems(){
+
+    //Commencer la table
+    $("#tableItems").empty();
+    var tableHead = "<thead><tr><th></th><th>Produit</th><th>Prix unitaire</th><th>Quantité</th><th>Prix</th></tr></thead><tbody>"
+    $("#tableItems").append(tableHead)
+
+   //Recueillir les produits du json
+  $.getJSON("./data/products.json", function getArray(result){
+
+    listeTriée = []
+    listePrix= []
+
+  $.each(result, function(ordre, article){
+
+    //Mesure de prévention pour ne pas avoir des articles qui ne sont pas ajoutés dans le panier 
+    if(listeProduct.includes(article.id) && localStorage.getItem(article.id) != 0){
+      listeTriée.push(article)
+    }
+
+  });
+
+  //Trier la liste de produit en ordre alphabétique
+  listeTriée.sort(function(a,b){
+  if(a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+  if(b.name.toLowerCase() < a.name.toLowerCase()) return 1;
+  return 0;
+  }); 
+  
+ 
+  //Remplir la table
+  $.each(listeTriée, function(ordre, article){
+
+    var qt;
+    if(localStorage.getItem(article.id) == 1){qt = "disabled " }
+    if(localStorage.getItem(article.id) > 1){qt = "" }
+
+
+    listePrix.push(localStorage.getItem(article.id) * article.price);
+    var lien = "./product.html?id=" + article.id;
+    var tableProduit = "<tr><td><button title='Supprimer' id='Supprimer-"+ article.id+ "'><i class='fa fa-times'></i></button></td>"+
+        "<td><a href=" + lien +">"+ article.name + "</a></td>" +
+        "<td>" + article.price + "&thinsp;$</td>" +
+        "<td><div class='row'><div class='col'><button title='Retirer'" + qt + "id='Retirer-"+ article.id+ "'><i class='fa fa-minus'></i></button>" +
+        "</div><div class='col'>"+ localStorage.getItem(article.id) +"</div>" +
+        "<div class='col'><button title='Ajouter' id='Ajouter-"+ article.id+ "'><i class='fa fa-plus'></i></button>" +
+        "</div></div></td><td>" + localStorage.getItem(article.id) * article.price + "&thinsp;$</td></tr>"
+
+    $("#tableItems").append(tableProduit)  
+
+    })
+    
+    //On recueille le id du bouton clické 
+    //Les boutons sont appelés Supprimer-ID, retirer-ID et Ajouter-ID donc on décide quoi faire à partir du préfixe
+    $("button").click(function() {
+      var itemID = this.id
+      var action = itemID.split("-")[0]
+   
+      if(action == "Supprimer"){supprimer(itemID.split("-")[1])}
+      if(action == "Retirer"){retirer(itemID.split("-")[1])}
+      if(action == "Ajouter"){ajouter(itemID.split("-")[1])}
+    });
+
+    //Fonction pour afficher le prix total
+    //Update le total
+    var tot= 0;
+    $.each(listePrix, function(ordre, prix){
+      tot += prix;
+    })
+
+  //Fermer la table
+  var tableEnd = "</tbody>"    
+    $("#tableItems").append(tableEnd)
+
+    $("#total").empty();
+    $("#total").append("Total: <strong>" +tot + "&thinsp;$</strong>")
+
+  });
+
+  }
+
+  //Fonction pour supprimer l'article du panier
+  function supprimer(id){
+
+    let text = "Voulez-vous supprimer le produit du panier ?"
+    if(confirm(text) == true){
+    var countActuel = localStorage.getItem("countValue")
+    var nbItem = localStorage.getItem(id)
+    newCount = countActuel - nbItem
+    localStorage.setItem("countValue", newCount)
+    updateCount();
+
+    localStorage.setItem(id, 0)
+    var index = listeProduct.indexOf(parseFloat(id))
+    listeProduct.splice(index, 1)
+    loadItems();}
+   
+
+  }
+
+  //Fonction pour retirer la quantité de l'article dans le panier
+  function retirer(id){
+
+    var nbActuel = localStorage.getItem(id)
+    var newNb = parseInt(nbActuel) - 1;
+
+    localStorage.setItem(id, newNb)
+    loadItems();
+
+    var countActuel = localStorage.getItem("countValue")
+    newCount = parseInt(countActuel) - 1
+    localStorage.setItem("countValue", newCount)
+    updateCount();
+
+  }
+
+  //Fonction pour ajouter une quantité de l'article
+  function ajouter(id){
+    var nbActuel = localStorage.getItem(id)
+    var newNb = parseInt(nbActuel) + 1;
+
+    localStorage.setItem(id, newNb)
+
+    loadItems();
+
+    var countActuel = localStorage.getItem("countValue")
+    newCount = parseInt(countActuel) + 1
+    localStorage.setItem("countValue", newCount)
+    updateCount();
+  }
+
+  //Fonction pour retirer tous les articles 
+  function removeAllItems(){
+
+    if(listeProduct.length > 0){
+      let text = "Voulez vous supprimer tous les produits du panier?"
+      if(confirm(text) == true){
+        for(i=0; i < listeProduct.length;i++){
+          localStorage.setItem(listeProduct[i], 0)
+        }
+        listeProduct = []
+        loadItems();
+        
+        localStorage.setItem("countValue", 0)
+        updateCount();
+      }
+    }
+  }
+
+  //Quand on click le bouton removeAll, on applique la fonction removeAllItems()
+  $("#removeAll").click(function(){removeAllItems()})
+ 
+  updateCount();
+  storeID();
+  loadItems();
+
+
+  });
+  
+  </script>
+</html>
